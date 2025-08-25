@@ -7,20 +7,35 @@ It integrates **crop recommendation, disease detection, fertilizer suggestions, 
 
 ## ✨ Features  
 
+ - 🏢 **Nearest Soil Testing Center**  
+  Locates and displays the nearest soil testing centers on an interactive map, helping farmers access soil health services.
+<img width="961" height="456" alt="image" src="https://github.com/user-attachments/assets/e475fc76-340d-4ab4-a7c1-255ce7f9c84c" />
+
+
 - 🚜 **Crop Recommendation**  
-  Suggests the most suitable crop based on soil nutrients (NPK), temperature, rainfall, and pH values.  
+  Suggests the most suitable crop based on soil nutrients (NPK), temperature, rainfall, and pH values.
+  <img width="976" height="463" alt="image" src="https://github.com/user-attachments/assets/a367401c-1965-44c4-8723-44315080ef45" />
+ 
 
 - 🌾 **Disease Detection**  
-  Upload a crop image → AI identifies possible diseases and recommends treatment.  
+  Upload a crop image → AI identifies possible diseases and recommends treatment.
+  <img width="976" height="463" alt="image" src="https://github.com/user-attachments/assets/54992292-f792-4394-9073-a96d2cc71e0f" />
 
-- 🧪 **Fertilizer Suggestions**  
-  Provides the best fertilizer type and usage for chosen crops.  
+
+- 🧪 **Fertilizer Store**  
+  Provides the best fertilizers.
+  <img width="974" height="470" alt="image" src="https://github.com/user-attachments/assets/0feadb0f-cbcd-4edd-bf6e-a08b6f95b768" />
+  
 
 - ☁️ **Weather & Climate Info**  
-  Real-time weather updates with geolocation support and nearby soil test center mapping.  
+  Real-time weather updates with geolocation support and nearby soil test center mapping.
+  <img width="975" height="464" alt="image" src="https://github.com/user-attachments/assets/6e56eea4-7218-497b-9237-8ea97f306fa1" />
+
 
 - 💬 **AI Chatbot**  
-  Interactive assistant that guides farmers step-by-step for crop inputs, disease queries, and general help.  
+  Interactive assistant that guides farmers step-by-step for crop inputs, disease queries, and general help.
+  <img width="975" height="467" alt="image" src="https://github.com/user-attachments/assets/6c34ccf6-ac8c-40b8-82c5-e38f0f3e19de" />
+
 
 ---
 
