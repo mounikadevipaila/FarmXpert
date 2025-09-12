@@ -15,15 +15,15 @@ router.post("/analyze", upload.single("image"), (req, res) => {
     return res.status(400).json({ error: "No image uploaded" });
   }
 
-  // Save temporary file
+  // Ensure uploads directory exists
   const tempDir = path.join(__dirname, "../uploads");
   if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
 
+  // Save the uploaded image temporarily
   const tempPath = path.join(tempDir, `${Date.now()}-${req.file.originalname}`);
   fs.writeFileSync(tempPath, req.file.buffer);
 
-  // Call Python script
-  // Use "python3" or "py" depending on your server
+  // Spawn Python process (use python3 for Linux/Render)
   const pythonProcess = spawn("python3", ["./app.py", tempPath]);
 
   let output = "";
@@ -48,9 +48,10 @@ router.post("/analyze", upload.single("image"), (req, res) => {
       return res.status(500).json({ error: errors || "Python script failed" });
     }
 
-    // Return JSON result
+    // Parse Python script output
     try {
-      const resultJSON = JSON.parse(output); // Ensure your Python script prints valid JSON
+      // Ensure your Python script prints a valid JSON string, e.g., {"disease": "Powdery Mildew"}
+      const resultJSON = JSON.parse(output);
       res.status(200).json({ result: resultJSON });
     } catch (err) {
       console.error("Failed to parse Python output:", err);
