@@ -7,17 +7,19 @@ function DiseaseIdentifier() {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
     setPreviewUrl(selectedFile ? URL.createObjectURL(selectedFile) : null);
     setResult(""); // clear previous result
+    setError(""); // clear previous error
   };
 
   const handleUpload = async () => {
     if (!file) {
-      alert("Please select an image first");
+      setError("❌ Please select an image first.");
       return;
     }
 
@@ -26,18 +28,27 @@ function DiseaseIdentifier() {
 
     try {
       setLoading(true);
-      // Updated URL to match Node.js backend route
+      setError("");
+      setResult("");
+
+      // Replace with your live backend URL if deployed
       const response = await axios.post(
-        "http://127.0.0.1:5000/api/analyze",
+        "https://disease-analyzer.onrender.com/api/analyze",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
         }
       );
-      setResult(response.data.result);
-    } catch (error) {
-      setResult(
-        "❌ Error: " + (error.response?.data?.error || error.message)
+
+      if (response.data.result) {
+        setResult(response.data.result);
+      } else {
+        setError("❌ No result returned from server.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError(
+        "❌ Error uploading image: " + (err.response?.data?.error || err.message)
       );
     } finally {
       setLoading(false);
@@ -47,18 +58,27 @@ function DiseaseIdentifier() {
   return (
     <div className="farm_app-container">
       <h2>AI Plant Disease Identifier</h2>
+
       <input
         type="file"
         accept="image/*"
         onChange={handleFileChange}
         className="farm_file-input"
       />
+
       {previewUrl && (
         <img src={previewUrl} alt="Preview" className="farm_image-preview" />
       )}
-      <button onClick={handleUpload} className="farm_analyze-btn" disabled={loading}>
+
+      <button
+        onClick={handleUpload}
+        className="farm_analyze-btn"
+        disabled={loading}
+      >
         {loading ? "Analyzing..." : "Analyze"}
       </button>
+
+      {error && <div className="farm_error">{error}</div>}
 
       {result ? (
         <div className="farm_result-card">
@@ -67,11 +87,10 @@ function DiseaseIdentifier() {
           ))}
         </div>
       ) : (
-        <div className="farm_result-box">Results will appear here...</div>
+        !error && <div className="farm_result-box">Results will appear here...</div>
       )}
     </div>
   );
 }
 
 export default DiseaseIdentifier;
-  
