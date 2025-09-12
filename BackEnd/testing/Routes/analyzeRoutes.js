@@ -5,34 +5,57 @@ const fs = require("fs");
 const path = require("path");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() }); // store in memory
 
+// Store uploaded file in memory first
+const upload = multer({ storage: multer.memoryStorage() });
+
+// POST /api/analyze
 router.post("/analyze", upload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No image uploaded" });
+  if (!req.file) {
+    return res.status(400).json({ error: "No image uploaded" });
+  }
 
-  const tempPath = path.join(__dirname, "../uploads", `${Date.now()}-${req.file.originalname}`);
+  // Save temporary file
+  const tempDir = path.join(__dirname, "../uploads");
+  if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+  const tempPath = path.join(tempDir, `${Date.now()}-${req.file.originalname}`);
   fs.writeFileSync(tempPath, req.file.buffer);
 
-  // Use `py` instead of `python` on Windows
-  const pythonProcess = spawn("py", ["./app.py", tempPath]);
+  // Call Python script
+  // Use "python3" or "py" depending on your server
+  const pythonProcess = spawn("python3", ["./app.py", tempPath]);
 
-  let result = "";
+  let output = "";
+  let errors = "";
+
   pythonProcess.stdout.on("data", (data) => {
-    result += data.toString();
+    output += data.toString();
   });
 
-  pythonProcess.stderr.on("data", (err) => {
-    console.error("Python error:", err.toString());
+  pythonProcess.stderr.on("data", (data) => {
+    errors += data.toString();
+    console.error("Python error:", data.toString());
   });
 
   pythonProcess.on("close", (code) => {
+    // Delete temporary file
     fs.unlink(tempPath, (err) => {
       if (err) console.error("Failed to delete temp file:", err);
     });
-    if (code !== 0) {
-      return res.status(500).json({ error: "Python script failed" });
+
+    if (code !== 0 || errors) {
+      return res.status(500).json({ error: errors || "Python script failed" });
     }
-    res.json({ result });
+
+    // Return JSON result
+    try {
+      const resultJSON = JSON.parse(output); // Ensure your Python script prints valid JSON
+      res.status(200).json({ result: resultJSON });
+    } catch (err) {
+      console.error("Failed to parse Python output:", err);
+      res.status(500).json({ error: "Invalid output from Python script" });
+    }
   });
 });
 
