@@ -95,7 +95,7 @@ import k_3 from "../assets_sri/k-3.png";
 import k_4 from "../assets_sri/k-4.png";
 import k_5 from "../assets_sri/k-5.png";
 import k_6 from "../assets_sri/k-6.png";
-import k_7 from "../assets_sri/k-7.png";
+
 import k_8 from "../assets_sri/k-8.png";
 import k_9 from "../assets_sri/k-9.png";
 import k_10 from "../assets_sri/k-10.png";
@@ -1476,21 +1476,7 @@ const allfertilizers = [
     benefits: "Balanced growth and flowering",
     precautions: "Avoid mixing with incompatible solutions"
   },
-  {
-    category: "By Nutrient Content",
-    type: "Potassium",
-    name: "Wood Ash (Organic)",
-    price: "₹20 per kg",
-    image: k_7,
-    description: "Traditional potassium source from burnt plant material.",
-    unitPrice: 10,
-    packaging: "Varies",
-    crops: "Organic farming; acidic soils",
-    nutrients: "5–7% K₂O, calcium, magnesium",
-    usage: "Apply directly to soil; avoid young plants",
-    benefits: "Improves pH and adds micro-elements",
-    precautions: "Don’t apply near seedlings; high alkalinity"
-  },
+  
   {
     category: "By Nutrient Content",
     type: "Potassium",
