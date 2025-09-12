@@ -1,0 +1,8 @@
+flask
+numpy
+pillow
+torch
+tensorflow
+opencv-python
+google-generativeai
+# Add any other Python packages your app.py uses
