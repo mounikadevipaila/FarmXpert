@@ -1198,7 +1198,8 @@ const PORT = process.env.PORT || 5000;
 // --------------------
 // ✅ MongoDB Connection
 // --------------------
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
@@ -1211,20 +1212,23 @@ mongoose.connect(process.env.MONGO_URI)
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",       
-      "http://localhost:5173",       
-      "https://farm-xpert-frontend-rddk.vercel.app" // ✅ no trailing slash
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://farm-xpert-frontend-rddk.vercel.app", // ✅ Vercel frontend
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // allow preflight
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
+// Handle preflight requests
+app.options("*", cors());
 
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use('/uploads', express.static('uploads')); // for profile pics
+app.use("/uploads", express.static("uploads")); // for profile pics
 
 // --------------------
 // ✅ Import models and routes
@@ -1277,7 +1281,16 @@ app.get("/entries", async (req, res) => {
 // --------------------
 app.post("/api/recommend", async (req, res) => {
   try {
-    const { soilType, pH, nitrogen, phosphorus, potassium, temperature, humidity, state } = req.body;
+    const {
+      soilType,
+      pH,
+      nitrogen,
+      phosphorus,
+      potassium,
+      temperature,
+      humidity,
+      state,
+    } = req.body;
 
     let recommendation = [];
     if (pH >= 6 && nitrogen > 40) recommendation.push("Wheat");
@@ -1306,10 +1319,10 @@ const userSchema = new mongoose.Schema({
 });
 
 // Prevent OverwriteModelError
-const User = mongoose.models.User || mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 const storage = multer.diskStorage({
-  destination: './uploads/',
+  destination: "./uploads/",
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   },
@@ -1318,22 +1331,22 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Register user with profile picture
-app.post('/api/register', upload.single('profilePicture'), async (req, res) => {
+app.post("/api/register", upload.single("profilePicture"), async (req, res) => {
   try {
     const { name, email, mobile } = req.body;
-    const profilePicture = req.file ? req.file.filename : '';
+    const profilePicture = req.file ? req.file.filename : "";
 
     const newUser = new User({ name, email, mobile, profilePicture });
     await newUser.save();
-    res.status(201).json({ message: 'User Registered Successfully!' });
+    res.status(201).json({ message: "User Registered Successfully!" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server Error' });
+    res.status(500).json({ message: "Server Error" });
   }
 });
 
 // Get all users
-app.get('/api/users', async (req, res) => {
+app.get("/api/users", async (req, res) => {
   const users = await User.find();
   res.json(users);
 });
@@ -1344,15 +1357,3 @@ app.get('/api/users', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-
-
-
-
-
-
-
-
-
-     
-
