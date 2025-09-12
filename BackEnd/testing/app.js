@@ -1209,9 +1209,14 @@ mongoose.connect(process.env.MONGO_URI)
 // ✅ Middlewares
 // --------------------
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
+  origin: [
+    'http://localhost:3000',       // local dev
+    'http://localhost:5173',       // Vite dev
+    'https://farm-xpert-frontend-rddk.vercel.app/' // replace with your Vercel frontend URL
+  ],
   credentials: true
 }));
+
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
