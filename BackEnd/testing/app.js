@@ -1175,12 +1175,6 @@
 
 
 
-
-
-
-
-
-
 // Load environment variables
 require("dotenv").config();
 
@@ -1189,24 +1183,31 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+const { spawn } = require("child_process");
 
 const app = express();
 
-// ✅ Default PORT fallback
+// --------------------
+// ✅ Default PORT
+// --------------------
 const PORT = process.env.PORT || 5000;
 
-// ✅ MongoDB Atlas Connection (Single DB for all features)
-mongoose.connect(
-  process.env.MONGO_URI || "mongodb+srv://vyshnavi:vyshu2004@mycluster.qlrf0.mongodb.net/farmxpertDB?retryWrites=true&w=majority",
-  { useNewUrlParser: true, useUnifiedTopology: true }
-)
-  .then(() => console.log("✅ MongoDB Atlas connected successfully"))
+// --------------------
+// ✅ MongoDB Connection
+// --------------------
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
-    process.exit(1); // Exit process if MongoDB connection fails
+    process.exit(1);
   });
 
+// --------------------
 // ✅ Middlewares
+// --------------------
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true
@@ -1214,23 +1215,32 @@ app.use(cors({
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads')); // for profile pics
 
+// --------------------
 // ✅ Import models and routes
+// --------------------
 const FormData = require("./Models/FormData");
 const weatherRoutes = require("./Routes/weatherRoutes");
 const wishlistRoutes = require("./Routes/wishlistRoutes");
 const cartRoutes = require("./Routes/cartRoutes");
 const orderRoutes = require("./Routes/orderRoutes");
-const userRoutes = require("./Routes/userRoutes"); // From first code
+const userRoutes = require("./Routes/userRoutes");
+const analyzeRoutes = require("./Routes/analyzeRoutes");
 
+// --------------------
 // ✅ Register routes
+// --------------------
 app.use("/api/weather", weatherRoutes);
 app.use("/wishlist", wishlistRoutes);
 app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
-app.use("/api", userRoutes); // From first code
+app.use("/api", userRoutes);
+app.use("/api", analyzeRoutes);
 
-// ✅ Save form data (contact, etc.)
+// --------------------
+// ✅ Save form data
+// --------------------
 app.post("/submit", async (req, res) => {
   try {
     const newForm = new FormData(req.body);
@@ -1241,7 +1251,9 @@ app.post("/submit", async (req, res) => {
   }
 });
 
+// --------------------
 // ✅ Get all form submissions
+// --------------------
 app.get("/entries", async (req, res) => {
   try {
     const entries = await FormData.find().sort({ createdAt: -1 });
@@ -1251,22 +1263,14 @@ app.get("/entries", async (req, res) => {
   }
 });
 
-// ✅ Crop recommendation logic
+// --------------------
+// ✅ Crop recommendation
+// --------------------
 app.post("/api/recommend", async (req, res) => {
   try {
-    const {
-      soilType,
-      pH,
-      nitrogen,
-      phosphorus,
-      potassium,
-      temperature,
-      humidity,
-      state,
-    } = req.body;
+    const { soilType, pH, nitrogen, phosphorus, potassium, temperature, humidity, state } = req.body;
 
     let recommendation = [];
-
     if (pH >= 6 && nitrogen > 40) recommendation.push("Wheat");
     if (temperature > 30 && humidity > 50) recommendation.push("Rice");
     if (potassium > 40) recommendation.push("Millets");
@@ -1282,7 +1286,64 @@ app.post("/api/recommend", async (req, res) => {
   }
 });
 
+// --------------------
+// ✅ User Upload & Registration
+// --------------------
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  mobile: String,
+  profilePicture: String,
+});
+
+// Prevent OverwriteModelError
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+// Register user with profile picture
+app.post('/api/register', upload.single('profilePicture'), async (req, res) => {
+  try {
+    const { name, email, mobile } = req.body;
+    const profilePicture = req.file ? req.file.filename : '';
+
+    const newUser = new User({ name, email, mobile, profilePicture });
+    await newUser.save();
+    res.status(201).json({ message: 'User Registered Successfully!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// Get all users
+app.get('/api/users', async (req, res) => {
+  const users = await User.find();
+  res.json(users);
+});
+
+// --------------------
 // ✅ Start the server
+// --------------------
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+
+
+
+
+
+
+
+
+
+     
+
