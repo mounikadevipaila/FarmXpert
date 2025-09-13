@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const CartItem = require('../models/cartModel'); // make sure you import the CartItem model
+const CartItem = require('../Models/cartModel'); // make sure you import the CartItem model
 const { addToCart, getCartItems, removeFromCart, updateQuantity } = require('../Controller/cartController');
 
 // Add item to cart
